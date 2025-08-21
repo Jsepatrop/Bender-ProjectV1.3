@@ -122,6 +122,26 @@
 - ESP32 : Documentation officielle WS2812E
 - Raspberry Pi Foundation : Pinout GPIO officiel
 
+### 2024-12-21 - Câblage direct LEDs WS2812E sans level-shifter
+**Contexte :** Question sur l'utilisation du TXS0108E level-shifter pour les LEDs WS2812E  
+**Options évaluées :**
+- Câblage direct ESP32 3.3V → WS2812E avec résistances 330Ω
+- Utilisation d'un level-shifter TXS0108E ou 74AHCT125
+
+**Décision :** Câblage direct sans level-shifter en première approche  
+**Justification :** 
+- WS2812E acceptent 3.3V en entrée (seuil ≥ 0.7×VDD = 3.5V avec VDD=5V)
+- ESP32 sort 3.3V, suffisant dans la plupart des cas
+- Résistances 330Ω côté ESP32 pour protection
+- Simplification du câblage et réduction des composants
+
+**Impact :** 
+- Câblage simplifié : ESP32 GPIO → R330Ω → WS2812E DIN
+- Plan B documenté : ajout TXS0108E/74AHCT125 si problèmes de signal
+- Tests de validation requis pour confirmer la fiabilité
+
+**Référence :** Section 3.2.3 "LEDs WS2812E" du dossier de définition v1.2
+
 ---
 
 ## Décisions en attente

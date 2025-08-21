@@ -191,7 +191,7 @@
 - **GPIO17** : Eye Left (9 LEDs)
 - **GPIO21** : Eye Right (9 LEDs)
 
-### Schéma de connexion LEDs
+### Schéma de connexion LEDs (DIRECT - sans level-shifter)
 
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
@@ -200,14 +200,15 @@
 ├─────────────────┤    ├─────────────────┤    ├─────────────────┤
 │ VCC → 5V        │    │ VCC → 5V        │    │ VCC → 5V        │
 │ GND → GND       │    │ GND → GND       │    │ GND → GND       │
-│ DIN → GPIO16    │    │ DIN → GPIO17    │    │ DIN → GPIO21    │
-│     + R330Ω     │    │     + R330Ω     │    │     + R330Ω     │
+│ DIN ← R330Ω ←   │    │ DIN ← R330Ω ←   │    │ DIN ← R330Ω ←   │
+│     GPIO16      │    │     GPIO17      │    │     GPIO21      │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
          │                       │                       │
          └───────────────────────┼───────────────────────┘
                                  │
                     ┌─────────────────┐
                     │     ESP32       │
+                    │   3.3V Logic    │
                     │ GPIO16,17,21    │
                     └─────────────────┘
                                  │
@@ -216,6 +217,15 @@
                     │ 5V/5A + C1000µF │
                     │ Fusible 2.5-3A  │
                     └─────────────────┘
+
+Câblage détaillé :
+ESP32 GPIO16 ──[R330Ω]── WS2812E_TEETH DIN
+ESP32 GPIO17 ──[R330Ω]── WS2812E_EYE_LEFT DIN  
+ESP32 GPIO21 ──[R330Ω]── WS2812E_EYE_RIGHT DIN
+
+⚠️  IMPORTANT : Pas de TXS0108E level-shifter nécessaire
+    Les WS2812E acceptent 3.3V en entrée (seuil ≥ 0.7×VDD = 3.5V)
+    L'ESP32 sort 3.3V, ce qui est suffisant pour la plupart des cas
 ```
 
 ### Détail des connexions LEDs
@@ -228,9 +238,15 @@
 | **Total**| **36 LEDs**| **-**    | **-**      | **2.16A**        |
 
 **Composants de protection :**
-- **Résistances 330Ω** : Protection des lignes de données (placées près des LEDs)
-- **Condensateur 1000µF** : Stabilisation de l'alimentation 5V
+- **Résistances 330Ω** : Protection des lignes de données (placées près de l'ESP32)
+- **Condensateur 1000µF** : Stabilisation de l'alimentation 5V (près des LEDs)
 - **Fusible 2.5-3A** : Protection contre les surintensités
+
+**Notes de câblage :**
+- Résistances 330Ω côté ESP32 (pas côté LEDs)
+- Fils de données courts (<30cm) pour éviter les interférences
+- GND commun entre ESP32 et alimentation 5V des LEDs
+- ESP32 alimenté séparément (USB ou 5V→3.3V régulateur)
 
 ## 5. Alimentation générale
 
@@ -285,6 +301,8 @@ En cas de problème avec l'I²S full-duplex :
 2. **Alimentation** : Mesurer les tensions 3.3V et 5V
 3. **I²S Audio** : Test d'enregistrement et lecture
 4. **LEDs** : Test de chaque segment individuellement
+   - Vérifier que 3.3V ESP32 → WS2812E fonctionne sans level-shifter
+   - Si problème : ajouter TXS0108E ou 74AHCT125 en Plan B
 5. **Communication** : MQTT entre tous les composants
 
 ### Métriques cibles
