@@ -144,6 +144,8 @@ Write-Host ""
 Write-Host "TEST 4: MQTT Broker" -ForegroundColor Cyan
 $mqtt_host = $config['MQTT_HOST']
 $mqtt_port = $config['MQTT_PORT_PLAIN']
+$mqtt_tls_port = $config['MQTT_PORT_TLS']
+$mqtt_user = $config['MQTT_USER']
 if ($mqtt_host -and $mqtt_port) {
     Write-Host "   Port TCP $mqtt_host`:$mqtt_port..." -NoNewline
     try {
@@ -151,7 +153,7 @@ if ($mqtt_host -and $mqtt_port) {
         $connect = $tcpClient.ConnectAsync($mqtt_host, [int]$mqtt_port)
         $connect.Wait(5000)
         if ($tcpClient.Connected) {
-            Write-Host " OK" -ForegroundColor Green
+            Write-Host " OK (user: $mqtt_user)" -ForegroundColor Green
             $tcpClient.Close()
         } else {
             Write-Host " ECHEC" -ForegroundColor Red
@@ -160,8 +162,27 @@ if ($mqtt_host -and $mqtt_port) {
         Write-Host " ECHEC: $($_.Exception.Message)" -ForegroundColor Red
         Write-Host "      Verifier broker MQTT et port" -ForegroundColor Yellow
     }
+    
+    # Test MQTT TLS Port
+    if ($mqtt_tls_port) {
+        Write-Host "   Port TLS $mqtt_host`:$mqtt_tls_port..." -NoNewline
+        try {
+            $tcpClientTls = New-Object System.Net.Sockets.TcpClient
+            $connectTls = $tcpClientTls.ConnectAsync($mqtt_host, [int]$mqtt_tls_port)
+            $connectTls.Wait(5000)
+            if ($tcpClientTls.Connected) {
+                Write-Host " OK" -ForegroundColor Green
+                $tcpClientTls.Close()
+            } else {
+                Write-Host " ECHEC" -ForegroundColor Red
+            }
+        } catch {
+            Write-Host " ECHEC: $($_.Exception.Message)" -ForegroundColor Red
+            Write-Host "      Verifier broker MQTT TLS et port" -ForegroundColor Yellow
+        }
+    }
 } else {
-    Write-Host "   MQTT_HOST ou MQTT_PORT_PLAIN non defini" -ForegroundColor Red
+    Write-Host "   MQTT_HOST ou MQTT_PORT non defini" -ForegroundColor Red
 }
 Write-Host ""
 

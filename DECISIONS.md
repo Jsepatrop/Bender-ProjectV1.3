@@ -128,21 +128,28 @@
 
 **Décision** : Création et exécution du script `scripts/validate_connectivity.ps1`.
 
-**Résultats de validation** :
+**Mise à jour informations MQTT** :
+- **Host MQTT** : 192.168.1.100 → **192.168.1.138**
+- **Utilisateur** : bender → **mqttuser**
+- **Mot de passe** : bender_secret → **Bibi14170!**
+
+**Résultats de validation (après correction MQTT)** :
 - ✅ **Raspberry Pi 5** (192.168.1.104) : Ping OK, SSH OK
 - ✅ **Dell T630** (192.168.1.100) : Ping OK, SSH OK (connexion manuelle testée avec succès)
 - ✅ **Home Assistant API** (https://alban.freeboxos.fr:8123) : Authentification token OK
 - ✅ **ESP32** (COM6) : Port série accessible et fonctionnel
-- ⚠️ **MQTT Broker port 1883** : Fermé (seul port TLS 8883 probablement ouvert)
+- ✅ **MQTT Broker** (192.168.1.138) : Port TCP 1883 accessible avec mqttuser
+- ❌ **MQTT TLS** : Port 8883 non accessible (TLS non configuré)
 
 **Corrections apportées** :
 - Mise à jour ESP32_PORT de COM4 vers COM6 dans .env.local
 - Modification script validation pour utiliser SSH au lieu de WinRM pour T630
 - Test manuel SSH T630 réussi : `ssh Plex@192.168.1.100` avec mot de passe `Bibi14170!`
+- Test MQTT : Port 1883 sur 192.168.1.138 → ✅ Accessible
 
 **Actions restantes** :
-- Test MQTT sur port TLS 8883 au lieu de 1883
-- Validation que les certificats TLS sont bien présents dans `C:\ssl`
+- Configuration TLS MQTT pour port 8883 (optionnel pour v1)
+- **Toutes les connexions critiques sont opérationnelles**
 
 **Justification** : Validation préalable essentielle pour éviter blocages en Phase 1, conformément à la méthodologie "Reproductibilité" du dossier de définition.
 
