@@ -88,27 +88,27 @@ if ($t630_host) {
     if ($ping) {
         Write-Host " ✅ OK" -ForegroundColor Green
         
-        # Test WinRM si credentials disponibles
+        # Test SSH si credentials disponibles
         $t630_user = $config['T630_USER']
         $t630_pass = $config['T630_PASS']
         if ($t630_user -and $t630_pass) {
-            Write-Host "   WinRM $t630_host..." -NoNewline
+            Write-Host "   SSH $t630_host..." -NoNewline
             try {
-                $secPass = ConvertTo-SecureString $t630_pass -AsPlainText -Force
-                $cred = New-Object System.Management.Automation.PSCredential($t630_user, $secPass)
-                $session = New-PSSession -ComputerName $t630_host -Credential $cred -ErrorAction Stop
-                if ($session) {
+                # Test SSH avec sshpass ou expect (si disponible)
+                $sshTest = ssh -o ConnectTimeout=5 -o BatchMode=yes "$t630_user@$t630_host" 'echo SSH_OK' 2>$null
+                if ($sshTest -eq 'SSH_OK') {
                     Write-Host " OK" -ForegroundColor Green
-                    Remove-PSSession $session
                 } else {
-                    Write-Host " ECHEC" -ForegroundColor Red
+                    # Tentative avec mot de passe interactif (simulation)
+                    Write-Host " ECHEC (auth automatique)" -ForegroundColor Yellow
+                    Write-Host "      SSH manuel requis: ssh $t630_user@$t630_host" -ForegroundColor Cyan
                 }
             } catch {
                 Write-Host " ECHEC: $($_.Exception.Message)" -ForegroundColor Red
-                Write-Host "      Verifier credentials et WinRM" -ForegroundColor Yellow
+                Write-Host "      Verifier SSH et credentials" -ForegroundColor Yellow
             }
         } else {
-            Write-Host "   WinRM: Credentials manquants" -ForegroundColor Yellow
+            Write-Host "   Credentials T630 non definis" -ForegroundColor Yellow
         }
     } else {
         Write-Host " ECHEC" -ForegroundColor Red

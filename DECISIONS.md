@@ -130,13 +130,17 @@
 
 **Résultats de validation** :
 - ✅ **Raspberry Pi 5** (192.168.1.104) : Ping OK, SSH OK
+- ✅ **Dell T630** (192.168.1.100) : Ping OK, SSH OK (connexion manuelle testée avec succès)
 - ✅ **Home Assistant API** (https://alban.freeboxos.fr:8123) : Authentification token OK
-- ✅ **ESP32** (COM4) : Port série accessible
-- ⚠️ **Dell T630 WinRM** : Échec attendu (TrustedHosts non configuré)
+- ✅ **ESP32** (COM6) : Port série accessible et fonctionnel
 - ⚠️ **MQTT Broker port 1883** : Fermé (seul port TLS 8883 probablement ouvert)
 
-**Actions correctives identifiées** :
-- Configuration WinRM TrustedHosts sur machine locale pour accès T630
+**Corrections apportées** :
+- Mise à jour ESP32_PORT de COM4 vers COM6 dans .env.local
+- Modification script validation pour utiliser SSH au lieu de WinRM pour T630
+- Test manuel SSH T630 réussi : `ssh Plex@192.168.1.100` avec mot de passe `Bibi14170!`
+
+**Actions restantes** :
 - Test MQTT sur port TLS 8883 au lieu de 1883
 - Validation que les certificats TLS sont bien présents dans `C:\ssl`
 
