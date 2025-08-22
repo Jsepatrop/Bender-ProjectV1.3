@@ -97,6 +97,51 @@
 
 ## Décisions techniques prises
 
+### 2025-01-21 - Intégration informations PREREQUIS.md
+
+**Contexte** : L'utilisateur a mis à jour le fichier `docs/PREREQUIS.md` avec des informations critiques sur les accès machines, matériel, et configuration.
+
+**Décision** : Intégration complète des informations dans les fichiers de configuration du projet :
+- Création `.env.local` avec secrets réels (T630: 192.168.1.100/Plex, Pi5: 192.168.1.104/bender, HA token, etc.)
+- Mise à jour `.env.sample` avec structure complète
+- Création `inventory.yml` Ansible avec configuration des 3 machines
+- Validation que `.gitignore` protège les secrets
+
+**Justification** :
+- **Sécurité** : Séparation claire secrets (.env.local non versionné) vs structure (.env.sample versionné)
+- **Reproductibilité** : Inventory Ansible permet déploiement automatisé
+- **Conformité** : Respect des contraintes du dossier de définition (TLS, accès machines, voix siwis-medium)
+
+**Impact** :
+- Configuration centralisée et sécurisée
+- Prêt pour tests de connectivité et déploiement automatisé
+- Choix voix TTS validé : `fr_FR-siwis-medium`
+
+**Références** :
+- `docs/PREREQUIS.md` (informations source)
+- `.env.local` (secrets), `.env.sample` (structure)
+- `inventory.yml` (configuration Ansible)
+
+### 2025-01-21 - Validation connectivité machines
+
+**Contexte** : Validation des accès aux machines du projet avant démarrage Phase 1.
+
+**Décision** : Création et exécution du script `scripts/validate_connectivity.ps1`.
+
+**Résultats de validation** :
+- ✅ **Raspberry Pi 5** (192.168.1.104) : Ping OK, SSH OK
+- ✅ **Home Assistant API** (https://alban.freeboxos.fr:8123) : Authentification token OK
+- ✅ **ESP32** (COM4) : Port série accessible
+- ⚠️ **Dell T630 WinRM** : Échec attendu (TrustedHosts non configuré)
+- ⚠️ **MQTT Broker port 1883** : Fermé (seul port TLS 8883 probablement ouvert)
+
+**Actions correctives identifiées** :
+- Configuration WinRM TrustedHosts sur machine locale pour accès T630
+- Test MQTT sur port TLS 8883 au lieu de 1883
+- Validation que les certificats TLS sont bien présents dans `C:\ssl`
+
+**Justification** : Validation préalable essentielle pour éviter blocages en Phase 1, conformément à la méthodologie "Reproductibilité" du dossier de définition.
+
 ### 2024-12-21 - Schéma de câblage détaillé et validation des spécifications
 **Contexte :** Besoin de valider les spécifications de câblage du dossier de définition avec les documentations officielles des composants  
 **Options évaluées :**
