@@ -1,0 +1,33 @@
+[Unit]
+Description=Bender UI - Interface utilisateur web
+After=network.target
+Wants=network.target
+
+[Service]
+Type=simple
+User=bender
+Group=bender
+WorkingDirectory=/opt/bender/ui
+Environment=PYTHONPATH=/opt/bender/ui
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 -m uvicorn app:app --host 0.0.0.0 --port 8080 --ssl-keyfile /opt/bender/certs/server.key --ssl-certfile /opt/bender/certs/server.crt
+Restart=always
+RestartSec=5
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=bender-ui
+
+# Sécurité
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/bender/ui
+ReadOnlyPaths=/opt/bender/certs
+
+# Limites de ressources
+MemoryMax=256M
+CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

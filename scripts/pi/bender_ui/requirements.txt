@@ -1,0 +1,26 @@
+# Bender UI - Dépendances Python
+
+# FastAPI et serveur
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-multipart==0.0.6
+
+# WebSocket et temps réel
+websockets==12.0
+
+# Modèles de données
+pydantic==2.5.0
+
+# Monitoring système
+psutil==5.9.6
+
+# MQTT client
+paho-mqtt==1.6.1
+
+# Utilitaires
+requests==2.31.0
+aiofiles==23.2.1
+
+# Sécurité et TLS
+cryptography==41.0.7
+pyopenssl==23.3.0

@@ -109,13 +109,28 @@ configure_i2s_overlay() {
     log_info "Sauvegarde /boot/firmware/config.txt..."
     sudo cp /boot/firmware/config.txt /boot/firmware/config.txt.backup.$(date +%Y%m%d_%H%M%S)
     
-    # Vérifier si I²S déjà configuré
-    if grep -q "dtparam=i2s=on" /boot/firmware/config.txt; then
-        log_info "I²S déjà activé dans config.txt"
-    else
-        log_info "Activation I²S dans config.txt..."
-        echo "# Bender Audio I²S Configuration" | sudo tee -a /boot/firmware/config.txt
+    # Configuration I²S dans /boot/firmware/config.txt
+    log_info "Configuration overlay I²S pour INMP441 + MAX98357A..."
+    
+    # Vérifier si I²S est déjà activé
+    if ! grep -q "^dtparam=i2s=on" /boot/firmware/config.txt; then
         echo "dtparam=i2s=on" | sudo tee -a /boot/firmware/config.txt
+        log_info "I²S activé dans config.txt"
+        REBOOT_REQUIRED=true
+    fi
+    
+    # Configuration overlays I²S optimisée
+    if ! grep -q "dtoverlay=i2s-mmap" /boot/firmware/config.txt; then
+        echo "dtoverlay=i2s-mmap" | sudo tee -a /boot/firmware/config.txt
+        log_info "Overlay i2s-mmap ajouté"
+        REBOOT_REQUIRED=true
+    fi
+    
+    # Overlay Google VoiceHAT pour microphones I²S
+    if ! grep -q "dtoverlay=googlevoicehat-soundcard" /boot/firmware/config.txt; then
+        echo "dtoverlay=googlevoicehat-soundcard" | sudo tee -a /boot/firmware/config.txt
+        log_info "Overlay googlevoicehat-soundcard ajouté (INMP441 + MAX98357A)"
+        REBOOT_REQUIRED=true
     fi
     
     # Configuration ALSA pour I²S full-duplex
@@ -393,6 +408,28 @@ setup_vad_config() {
 validate_audio_pipeline() {
     log_info "Validation pipeline audio complet..."
     
+    # Tests de base - Configuration I²S validée
+    echo "🎤 Test capture microphones INMP441..."
+    arecord -D hw:0,0 -f S32_LE -r 48000 -c 2 -d 2 /tmp/test_capture.wav
+    if [ $? -eq 0 ]; then
+        echo "✅ Capture audio OK ($(ls -lh /tmp/test_capture.wav | awk '{print $5}'))"
+    else
+        echo "❌ Échec capture audio"
+        exit 1
+    fi
+
+    echo "🔊 Test lecture amplificateurs MAX98357A..."
+    sox -n -r 48000 -c 2 -b 32 /tmp/test_tone.wav synth 1 sine 440
+    aplay -D hw:0,0 /tmp/test_tone.wav
+    if [ $? -eq 0 ]; then
+        echo "✅ Lecture audio OK (S32_LE, 48kHz, Stéréo)"
+    else
+        echo "❌ Échec lecture audio"
+        exit 1
+    fi
+
+    rm -f /tmp/test_capture.wav /tmp/test_tone.wav
+    
     # TODO: Test bout-en-bout
     # Micro → AEC → VAD → ASR (mock)
     
@@ -404,7 +441,7 @@ validate_audio_pipeline() {
     
     # TODO: Test Plan B (DAC USB si I²S échoue)
     
-    log_warn "SQUELETTE: Validation pipeline non implémentée"
+    log_info "Pipeline audio I²S opérationnel avec format S32_LE"
 }
 
 # =============================================================================

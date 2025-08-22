@@ -1,0 +1,367 @@
+# =============================================================================
+# SECRETS ET CONFIGURATION SENSIBLE
+# =============================================================================
+
+# Fichiers de configuration avec secrets
+.env.local
+.env.production
+.env.*.local
+*.env
+!.env.sample
+
+# Clés et certificats
+*.key
+*.pem
+*.p12
+*.pfx
+*.crt
+*.csr
+*.ca-bundle
+*.cer
+*.der
+
+# Tokens et credentials
+token.txt
+credentials.json
+auth.json
+secrets/
+certs/
+keys/
+
+# =============================================================================
+# LOGS ET DONNÉES TEMPORAIRES
+# =============================================================================
+
+# Logs système
+*.log
+*.log.*
+logs/
+*.out
+*.err
+
+# Données audio (protection vie privée)
+audio_logs/
+recordings/
+*.wav
+*.mp3
+*.flac
+*.ogg
+!test/samples/*.wav
+
+# Métriques et bases de données locales
+*.db
+*.sqlite
+*.sqlite3
+metrics/
+data/
+cache/
+
+# =============================================================================
+# DÉVELOPPEMENT
+# =============================================================================
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+PIPFILE.lock
+
+# Virtual environments
+venv/
+env/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+.npm
+.eslintcache
+.node_repl_history
+*.tgz
+*.tar.gz
+.yarn-integrity
+.cache/
+
+# React/Next.js
+.next/
+out/
+build/
+.nuxt
+dist
+.cache
+.parcel-cache
+
+# =============================================================================
+# OUTILS ET IDE
+# =============================================================================
+
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# JetBrains IDEs
+.idea/
+*.swp
+*.swo
+*~
+
+# Vim
+*.swp
+*.swo
+*.tmp
+
+# Emacs
+*~
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+*.elc
+auto-save-list
+tramp
+.\#*
+
+# =============================================================================
+# SYSTÈME D'EXPLOITATION
+# =============================================================================
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# =============================================================================
+# DOCKER ET CONTAINERS
+# =============================================================================
+
+# Docker
+.dockerignore
+Dockerfile.local
+docker-compose.override.yml
+docker-compose.local.yml
+.docker/
+
+# Container data
+volumes/
+container-data/
+
+# =============================================================================
+# HARDWARE ET FIRMWARE
+# =============================================================================
+
+# PlatformIO (ESP32)
+.pio/
+.pioenvs/
+.piolibdeps/
+.clang_complete
+.gcc-flags.json
+
+# Arduino
+*.hex
+*.bin
+*.elf
+*.map
+
+# Firmware builds
+firmware/build/
+firmware/dist/
+
+# =============================================================================
+# MODÈLES ET ASSETS LOURDS
+# =============================================================================
+
+# Modèles TTS/ASR (téléchargés automatiquement)
+models/
+voices/
+*.onnx
+*.pt
+*.pth
+*.safetensors
+*.bin
+!models/.gitkeep
+
+# Modèles RVC (v1.1)
+rvc_models/
+checkpoints/
+*.pkl
+*.index
+
+# =============================================================================
+# TESTS ET BENCHMARKS
+# =============================================================================
+
+# Résultats de tests
+test-results/
+coverage/
+.coverage
+.pytest_cache/
+.tox/
+.nox/
+
+# Benchmarks
+benchmarks/results/
+performance/
+*.benchmark
+
+# Corpus de test (sauf échantillons)
+test/corpus/
+!test/corpus/samples/
+
+# =============================================================================
+# DÉPLOIEMENT ET PRODUCTION
+# =============================================================================
+
+# Backups
+*.backup
+*.bak
+*.old
+*.orig
+*.save
+
+# Archives
+*.zip
+*.tar
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.rar
+*.7z
+
+# Temporary deployment files
+deploy/
+release/
+package/
+
+# =============================================================================
+# SPÉCIFIQUE PROJET BENDER
+# =============================================================================
+
+# Configuration machines spécifique
+inventory.yml
+hosts.ini
+ansible.cfg
+
+# Données utilisateur
+user_samples/
+voice_training/
+personal_data/
+
+# Métriques temps réel
+metrics/realtime/
+monitoring/live/
+
+# Logs audio (protection vie privée)
+audio_capture/
+wake_samples/
+conversation_logs/
+
+# Certificats générés
+ssl/
+tls/
+ca/
+
+# Base de données mémoire
+memory.db
+conversations.db
+user_preferences.db
+
+# =============================================================================
+# EXCEPTIONS (fichiers à garder)
+# =============================================================================
+
+# Garder les exemples et templates
+!scripts/templates/
+!configs/examples/
+!docs/samples/
+!test/fixtures/
+
+# Garder les certificats de test
+!test/certs/*.crt
+!test/certs/*.key
+
+# Garder les échantillons audio de test
+!test/audio/samples/*.wav
+
+# Garder les configurations par défaut
+!configs/default/
+!firmware/default_config.h
+
+# =============================================================================
+# NOTES
+# =============================================================================
+
+# Ce .gitignore protège :
+# 1. Les secrets et credentials
+# 2. Les données personnelles (audio, conversations)
+# 3. Les fichiers temporaires et caches
+# 4. Les modèles lourds (téléchargés automatiquement)
+# 5. Les logs système
+# 6. Les certificats TLS
+# 7. Les bases de données locales
+#
+# Mise à jour : Ajouter de nouvelles exclusions si nécessaire
+# Validation : Vérifier qu'aucun secret n'est commité

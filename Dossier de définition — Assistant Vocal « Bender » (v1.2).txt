@@ -1,0 +1,336 @@
+Dossier de définition — Assistant Vocal « Bender » (v1.2)
+0) Utilité & vision
+
+Créer un assistant vocal local intégré dans une tête Bender (Ø 10 cm × H 20 cm) qui :
+
+écoute (wake word + ASR FR robuste, TV possible),
+
+contrôle la domotique Home Assistant (lumières, prises, scènes, capteurs, médias, routines),
+
+converse (persona Bender sarcastique FR, réglable),
+
+parle en voix FR par défaut (facile à télécharger, reproductible), puis évolue vers ta voix Bender-like via Voice Conversion (RVC),
+
+réagit visuellement (yeux/dents WS2812E) synchronisés à la parole/humeur,
+
+le tout local-first, serveurs prioritaires (T630), Pi en chef d’orchestre, confidentialité et TLS partout.
+
+1) Périmètre & objectifs
+
+Inclus v1 : wake→ASR→NLU/HA→TTS→LEDs ; UI Web complète (Pi) ; voix par défaut reproductible (téléchargeable depuis source officielle, version pinnée + checksum), gestion TLS & ACL, métriques HA.
+
+Évolution v1.1 : Voice Conversion (RVC) activable, pour substituer la voix par défaut par ta voix Bender-like (en gardant la réactivité).
+
+Exclus v1 : caméra/vision, batterie/mobilité, multilingue, cloud.
+
+Objectifs : domotique < 1,5 s médiane ; conversation 2,5–3 s typiques ; AEC/VAD stable ; uptime systemd ; pas d’exposition Internet.
+
+2) Matériel (BOM) & fonctions
+
+Compute / réseau
+
+Dell PowerEdge T630 (Windows Server 2022) : Docker/WSL2, hôte ASR (faster-whisper), LLM (Ollama), TTS (Piper), RVC (option).
+
+Raspberry Pi 5 (4 GB) + refroidissement + microSD 64 GB U3 : orchestrateur (wake, AEC/VAD, router intents, client TTS/LEDs, UI Web, audio out, TLS).
+
+Home Assistant existant + Mosquitto : broker MQTT (TLS + ACL), intégration entités/areas, supervision.
+
+Audio
+
+2× INMP441 (I²S) : front (Left), torse ~30 cm (Right).
+
+2× MAX98357A (I²S) : 1 ampli/HP ; 2× HP 4 Ω / 3 W (CQRobot).
+
+LEDs & contrôle
+
+ESP32 (DevKit) : 3 sorties data RMT indépendantes
+teeth=18 LED, eye_left=9 LED, eye_right=9 LED (WS2812E).
+
+Alim 5 V / 5 A dédiée LEDs, condo 1000 µF, R 330 Ω série data, GND commun, fusible 2,5–3 A.
+
+Diffuseurs résine yeux ; silent-blocks HP ; mousse acoustique.
+
+Élec/méca
+
+Inter général arrière ; évents ; inserts laiton ; trappes ; boîtier PETG (déjà imprimé).
+
+3) Architecture fonctionnelle
+Chaîne temps réel
+
+Wake “Bender” (Pi) → yeux “listen”, bip optionnel.
+
+Capture 2×INMP441 → AEC WebRTC + VAD → stream 16 kHz vers ASR.
+
+ASR (T630, streaming) → partiels (intents rapides) → final.
+
+Router (Pi) : domotique → MQTT→HA ; sinon → LLM (Ollama/T630).
+
+TTS (T630) : voix FR par défaut (Piper) → audio (Pi → I²S → 2×MAX98357A → 2×HP).
+
+Évolution : RVC (timbre Bender-like) après Piper, activable UI.
+
+LEDs (ESP32) : dents sync visèmes (si timecodes) ou RMS 20 ms ; yeux = états/humeurs.
+
+Rôles
+
+Pi : wake, AEC/VAD, endpointing, router intents HA, clients TTS/LEDs, UI/TLS, métriques HA, audio out.
+
+T630 : ASR (faster-whisper), LLM (Ollama), TTS (Piper), RVC option (Docker).
+
+ESP32 : firmware custom (NeoPixelBus RMT), animations locales & interpolation visèmes/RMS (MQTT).
+
+4) Audio — pinouts & traitements
+RPi 5 I²S (proposition stable)
+
+BCLK / SCK : GPIO 18 (pin 12)
+
+LRCLK / WS : GPIO 19 (pin 35)
+
+DIN (mics→Pi) : GPIO 20 (pin 38)
+
+DOUT (Pi→amps) : GPIO 21 (pin 40)
+
+3V3 : pins 1/17 (mics) ; 5V : pins 2/4 (amps) ; GND commun.
+
+INMP441 ×2
+
+Bus partagé (BCLK/LRCLK), SD commun vers GPIO20.
+
+Mic front (Left) : L/R → GND.
+
+Mic torse (Right) : L/R → 3V3.
+
+Option : 100 Ω en série sur chaque SD avant jonction.
+
+MAX98357A ×2
+
+Bus partagé (BCLK/LRCLK/DOUT).
+
+DIN des deux amplis → GPIO21.
+
+1 ampli/HP 4 Ω ; VIN 5 V ; GND commun.
+
+Traitements
+
+AEC WebRTC (PipeWire/PulseAudio, ref = monitor du sink).
+
+VAD webrtcvad (agressif ajustable UI).
+
+Option denoise rnnoise.
+
+In 48 kHz (AEC), ASR 16 kHz ; EQ (2–4 kHz) + limiter soft-clip (UI).
+
+Plan B si full-duplex I²S bloque : garder mics I²S, sortir via DAC USB + ampli analogique.
+
+5) LEDs — pinouts & effets
+ESP32 → WS2812E (3 chaînes)
+
+GPIO : teeth=16, eye_left=17, eye_right=21 (RMT OK) + R 330 Ω/ligne.
+
+Alim : 5 V / 5 A, condo 1000 µF, GND commun, injection proche yeux/dents.
+
+Option level-shifter 74AHCT125/245 si câbles longs.
+
+États & animations (personnalisables)
+
+listen : yeux cyan “scan”, dents off.
+
+think : yeux ambre “breathing”.
+
+speak : dents = visèmes (ou RMS 20 ms), yeux “blink”.
+
+joy/anger/error/idle/sleep : palettes & vitesses réglables.
+
+Brightness max par canal (par défaut 40 %, UI).
+
+6) Logiciel — composants
+Raspberry Pi 5
+
+Wake : Porcupine/openWakeWord (“Bender”), sensibilité UI.
+
+Audio : AEC WebRTC + VAD ; streaming Wyoming vers ASR T630.
+
+Router : NLU règles/slots/synonymes/%/couleurs (import HA).
+
+Clients : TTS (Piper T630) ; LEDs (MQTT state/viseme/env/config).
+
+UI Web : FastAPI (Python) + React (HTTPS, cert auto, login).
+
+Services systemd : bender-wake, bender-audio, bender-router, bender-tts-client, bender-leds-client, bender-ui, bender-metrics.
+
+Métriques HA : lat_asr/llm/tts, CPU/temp Pi & T630, faux réveils/h, WER.
+
+T630 (Docker/WSL2)
+
+ASR : faster-whisper (Wyoming, streaming, CUDA si GPU).
+
+LLM : Ollama (FR : Mistral-7B-Instruct Q4 ou Qwen2.5-7B-Instruct Q4).
+
+TTS : Piper (Wyoming).
+
+RVC (option) : voice conversion temps réel (API locale) insérée après Piper.
+
+ESP32
+
+Firmware custom : NeoPixelBus RMT + MQTT (state/viseme/env/config), animations locales, persistance palette.
+
+7) TTS & gestion de la voix (par défaut → custom)
+7.1 Voix par défaut (v1 — téléchargeable & reproductible)
+
+Moteur : Piper (FR).
+
+Choix du modèle : voix FR officielle Piper (neutre) avec version fixée (ex. “release X.Y”) et SHA-256 enregistré.
+
+Reproductibilité :
+
+l’UI propose “Télécharger la voix par défaut” depuis la source officielle,
+
+vérifie la somme SHA-256,
+
+place les artefacts dans voices/default/ (volume Docker piper:/data),
+
+set voice-id = fr-default@X.Y dans la config.
+
+Format attendu : paquet Piper standard (ex. model.onnx + model.json/config associée).
+
+Synchro LEDs : timecodes phonèmes si exposés, sinon RMS 20 ms.
+
+7.2 Remplacement futur par ta voix Bender-like (v1.1)
+
+Pipeline : Texte → Piper (FR) → RVC (Bender-like) → HP.
+
+Dataset : 10–30 min d’extraits propres FR (usage perso), nettoyés et découpés (2–10 s).
+
+Entraînement : sur T630 (Docker, GPU recommandé).
+
+Intégration : l’UI “Gestionnaire de voix” permet de sélectionner la voix :
+
+“Par défaut (Piper pur)” ou
+
+“Custom (Piper → RVC)”, avec toggles & sliders (mix, pitch).
+
+Reproductibilité : l’UI stocke version Piper, hash du modèle RVC, paramètres RVC (JSON), et permet export/import du profil de voix.
+
+Synchro LEDs : conservée (visèmes issus de Piper avant conversion).
+
+7.3 Option v2 (ultérieure)
+
+TTS cloné (VITS/XTTS/Coqui) complet si tu veux dépasser RVC (plus lourd, moins réactif).
+
+8) MQTT (v1)
+
+ASR :
+bender/asr/partial → {"text":"…","ts":<ms>}
+bender/asr/final → {"text":"…","ts":<ms>}
+
+Intents :
+bender/intent → {"domain":"light","action":"turn_on","entity":"salon","brightness":80}
+
+TTS :
+bender/tts/say → {"text":"…","voice":"fr-default@X.Y","rvc":false,"prio":"normal"}
+(puis rvc":true si RVC activé)
+
+LEDs :
+bender/led/state (“idle|listen|think|speak|joy|anger|error|sleep”)
+bender/led/viseme → {"t":<ms>,"v":"A|E|I|O|U|M|…"}
+bender/led/env → {"t":<ms>,"rms":0.0–1.0}
+bender/led/config → {"brightness":0–255,"palette":"<name>"}
+
+Système :
+bender/sys/metrics (latences, CPU/temp, faux réveils/h, WER)
+bender/sys/log (niveau réglable UI)
+
+Retained : seulement pour …/config et états non volatils.
+TLS activé ; ACL strictes ; comptes séparés (Pi/ESP32/T630).
+
+9) Domotique (NLU/HA)
+
+Périmètre v1 : lumières, prises, scènes, températures/capteurs, médias, routines.
+
+Synonymes, %, couleurs (HSV), comparatifs (“plus/moins”).
+
+Confirmations intelligentes pour actions massives (humour Bender).
+
+Ambiguïté : demande précision.
+
+HA : import Areas/Entities via API ; alias/synonymes éditables (UI) ; mode dry-run.
+
+10) LLM & persona, mémoire
+
+LLM (T630/Ollama) : Mistral-7B-Instruct Q4 ou Qwen2.5-7B-Instruct Q4.
+
+Fallback Pi : Phi-3-mini si indispo serveur.
+
+Persona : “Bender FR”, curseur d’impertinence (UI), filtrage minimal anti-haine ciblée (tout le reste peut être cash).
+
+Mémoire : contexte 10–20 tours + long terme (SQLite + embeddings) : préférences utilisateur, scènes/routines favorites HA — inspectable/éditable/purgeable (UI).
+
+11) UI Web (Pi)
+
+Backend : FastAPI (Python), clients MQTT/HA, HTTPS (cert auto).
+
+Frontend : React (WebSocket pour métriques & logs live).
+
+Sections :
+
+Dashboard (état, VU mics, latences, CPU/temp, logs),
+
+Audio (AEC/VAD/EQ/limiter, gains, tests),
+
+Wake (mot, sensibilité, timeout, bip),
+
+ASR/LLM/TTS (Gestionnaire de voix : télécharger voix par défaut + vérifier SHA-256 ; choisir voix par défaut vs Piper→RVC ; sliders mix/pitch ; tokens/température ; longueur réponses ; persona),
+
+LEDs (palettes, preview, visèmes/RMS, brightness),
+
+Domotique (import HA, alias/synonymes, confirmations, dry-run),
+
+Sécurité (TLS/ACL, comptes UI, rétention/logs, export config),
+
+Maintenance (restart systemd, backups, updates),
+
+Mémoire (long terme).
+
+12) Sécurité & vie privée
+
+TLS activé par défaut (UI & MQTT), certs auto-signés gérés localement.
+
+ACL Mosquitto, comptes séparés (Pi/ESP32/T630).
+
+Logs audio activés par défaut avec quotas/rétention (UI), bouton OFF.
+
+Local-only, pas d’exposition Internet.
+
+13) Tests & critères d’acceptation
+
+Domotique < 1,5 s médiane ; Conversation 2,5–3 s.
+
+AEC stable (pas de larsen), faux réveils/h maîtrisés.
+
+WER mesurée (silence/TV faible/forte).
+
+LEDs dents réactives < 60 ms (RMS) ; visèmes propres si dispo.
+
+UI complète, voix par défaut vérifiée par SHA-256, gestionnaire de voix opérationnel (basculer par défaut ↔ RVC).
+
+TLS/ACL OK ; mémoire longue fonctionnelle et éditable.
+
+14) Ordre opérationnel (confirmé)
+
+Maquette & câblage (Pi + ESP32 + mics + amplis + quelques LEDs).
+
+Dév/Install
+
+Pi : pipeline audio + router + UI + services (systemd),
+
+ESP32 : firmware LEDs,
+
+T630 : Docker (Ollama, Piper, faster-whisper) + téléchargement & vérification SHA-256 de la voix par défaut.
+
+Tests maquette (latences, WER, faux réveils, LEDs, AEC).
+
+Intégration mécanique (par toi).
+
+Paramétrages & tests finaux (persona, mémoire, palettes, confirmations, ACL).
+
+Évolution v1.1 : RVC (entraîner avec tes samples, activer UI).

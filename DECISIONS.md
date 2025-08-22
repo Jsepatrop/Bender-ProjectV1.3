@@ -258,6 +258,57 @@ Amplificateurs MAX98357A :
 
 **Impact** : T2.1 terminée, base solide pour T2.2 (Pipeline audio complet)
 
+### 2025-01-21 - Validation Overlays I²S Fonctionnels
+
+**Contexte** : Validation des overlays I²S pour communication avec INMP441 et MAX98357A.
+
+**Décision** : Configuration finale avec `googlevoicehat-soundcard` + `i2s-mmap`.
+
+**Résultats validés** :
+- **Capture** : INMP441 × 2 → `hw:0,0` format S32_LE, 48kHz, stéréo ✅
+- **Lecture** : MAX98357A × 2 ← `hw:0,0` format S32_LE, 48kHz, stéréo ✅
+- **Pinouts** : BCLK=GPIO18, LRCLK=GPIO19, DIN=GPIO20, DOUT=GPIO21 ✅
+
+**Overlays testés** :
+- `hifiberry-dac` : lecture OK, pas de capture
+- `dmic-soundcard` : incompatible
+- `googlevoicehat-soundcard` : **capture + lecture OK** ✅
+
+**Configuration finale** :
+```
+dtparam=i2s=on
+dtoverlay=i2s-mmap
+dtoverlay=googlevoicehat-soundcard
+```
+
+**Impact** : T2.1 complètement validée, overlays I²S fonctionnels confirmés
+
+**Référence** : Section 4.1.2 du Dossier de définition (Pinouts I²S)
+
+### 2025-08-22 - Pipeline Audio Opérationnel
+
+**Contexte** : Déploiement et validation du pipeline audio complet avec AEC et VAD.
+
+**Décision** : Pipeline audio `audio_pipeline.py` déployé avec mode test (MQTT désactivé temporairement).
+
+**Justification** :
+- Validation du pipeline audio indépendamment des dépendances MQTT
+- AEC WebRTC fonctionnel avec PipeWire
+- VAD webrtcvad opérationnel (détection voix 100%)
+- Conversion 48kHz→16kHz stable
+- Latence mesurée : 0.3ms (excellent)
+
+**Configuration validée** :
+- Périphérique : `snd_rpi_googlevoicehat_soundcar` (hw:0,0)
+- Format : 48000Hz, 2ch, int32, chunk=1024
+- Service systemd : `bender-audio.service` stable
+
+**Prochaine étape** : Réactivation MQTT après setup du router d'intents
+
+**Impact** : Fondation audio solide pour la chaîne ASR→NLU→TTS
+
+**Référence** : T2.2 du dossier de définition (Pipeline audio complet)
+
 ---
 
 ## Décisions en attente

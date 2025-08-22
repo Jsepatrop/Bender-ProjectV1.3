@@ -1,0 +1,40 @@
+[Unit]
+Description=Bender Intent Router Service
+Documentation=https://github.com/bender-project/bender
+After=network-online.target
+Wants=network-online.target
+Requires=bender-audio.service
+After=bender-audio.service
+
+[Service]
+Type=simple
+User=bender
+Group=bender
+WorkingDirectory=/opt/bender
+Environment=PYTHONPATH=/opt/bender
+Environment=PYTHONUNBUFFERED=1
+ExecStart=/usr/bin/python3 /opt/bender/intent_router.py
+Restart=always
+RestartSec=5
+StartLimitInterval=60
+StartLimitBurst=3
+
+# Logging
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=bender-intent
+
+# Security
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/opt/bender/logs
+ReadOnlyPaths=/opt/bender
+
+# Resource limits
+MemoryMax=256M
+CPUQuota=50%
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,295 @@
+# =============================================================================
+# GIT ATTRIBUTES - Assistant Vocal « Bender » v1.2
+# =============================================================================
+
+# Configuration des fins de ligne et encodage
+* text=auto eol=lf
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# =============================================================================
+# FICHIERS TEXTE
+# =============================================================================
+
+# Documentation
+*.md text
+*.txt text
+*.rst text
+*.adoc text
+README text
+LICENSE text
+CHANGELOG text
+AUTHORS text
+CONTRIBUTING text
+
+# Configuration
+*.json text
+*.yaml text
+*.yml text
+*.toml text
+*.ini text
+*.cfg text
+*.conf text
+*.env text
+*.env.* text
+
+# Code source
+*.py text diff=python
+*.js text
+*.ts text
+*.jsx text
+*.tsx text
+*.html text diff=html
+*.css text diff=css
+*.scss text
+*.sass text
+*.less text
+*.xml text
+*.svg text
+
+# Scripts shell
+*.sh text eol=lf
+*.bash text eol=lf
+*.zsh text eol=lf
+*.fish text eol=lf
+
+# Scripts Windows
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Makefiles
+Makefile text
+makefile text
+*.mk text
+
+# =============================================================================
+# FICHIERS BINAIRES
+# =============================================================================
+
+# Images
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.bmp binary
+*.tiff binary
+*.webp binary
+
+# Audio (même si exclus par .gitignore)
+*.wav binary
+*.mp3 binary
+*.flac binary
+*.ogg binary
+*.aac binary
+*.m4a binary
+
+# Vidéo
+*.mp4 binary
+*.avi binary
+*.mov binary
+*.wmv binary
+*.flv binary
+*.webm binary
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.bz2 binary
+*.xz binary
+*.7z binary
+*.rar binary
+
+# Exécutables
+*.exe binary
+*.dll binary
+*.so binary
+*.dylib binary
+*.app binary
+
+# Firmware et binaires embarqués
+*.bin binary
+*.hex binary
+*.elf binary
+*.map binary
+
+# Modèles ML (même si exclus par .gitignore)
+*.onnx binary
+*.pt binary
+*.pth binary
+*.pkl binary
+*.safetensors binary
+
+# Certificats et clés
+*.key binary
+*.pem binary
+*.crt binary
+*.p12 binary
+*.pfx binary
+
+# Bases de données
+*.db binary
+*.sqlite binary
+*.sqlite3 binary
+
+# =============================================================================
+# LINGUIST (GitHub language detection)
+# =============================================================================
+
+# Exclure de la détection de langage
+*.json linguist-generated=true
+package-lock.json linguist-generated=true
+yarn.lock linguist-generated=true
+
+# Marquer comme documentation
+docs/* linguist-documentation
+*.md linguist-documentation
+
+# Marquer comme vendored (dépendances)
+node_modules/* linguist-vendored
+vendor/* linguist-vendored
+third_party/* linguist-vendored
+
+# Forcer la détection de certains langages
+*.ino linguist-language=C++
+*.h linguist-language=C
+*.c linguist-language=C
+
+# =============================================================================
+# DIFF ET MERGE
+# =============================================================================
+
+# Stratégies de diff spécialisées
+*.py diff=python
+*.html diff=html
+*.css diff=css
+*.js diff=javascript
+*.json diff=json
+
+# Fichiers à ne pas merger automatiquement
+CHANGELOG.md merge=ours
+package-lock.json merge=ours
+yarn.lock merge=ours
+
+# Fichiers de configuration sensibles
+.env.* merge=ours
+inventory.yml merge=ours
+
+# =============================================================================
+# FILTRES SPÉCIAUX
+# =============================================================================
+
+# Nettoyage automatique des notebooks Jupyter
+*.ipynb filter=nbstripout
+*.ipynb diff=ipynb
+
+# Expansion des mots-clés Git
+*.py ident
+*.js ident
+*.ts ident
+*.html ident
+
+# =============================================================================
+# SPÉCIFIQUE PROJET BENDER
+# =============================================================================
+
+# Configuration firmware ESP32
+firmware/src/*.h text
+firmware/src/*.cpp text
+firmware/src/*.ino text
+firmware/platformio.ini text
+
+# Scripts de déploiement
+scripts/*.sh text eol=lf
+scripts/*.ps1 text eol=crlf
+scripts/pi/* text eol=lf
+scripts/t630/* text eol=crlf
+
+# Configuration services
+services/*.service text eol=lf
+services/*.timer text eol=lf
+configs/*.conf text
+configs/*.yaml text
+
+# Interface utilisateur
+ui/src/*.js text
+ui/src/*.ts text
+ui/src/*.jsx text
+ui/src/*.tsx text
+ui/src/*.css text
+ui/src/*.scss text
+ui/public/*.html text
+
+# Docker
+Dockerfile text eol=lf
+docker-compose*.yml text
+.dockerignore text
+
+# Ansible
+*.yml text
+playbooks/*.yml text
+inventory.yml text
+
+# =============================================================================
+# SÉCURITÉ
+# =============================================================================
+
+# Fichiers sensibles - forcer la vérification
+*.env.* text eol=lf
+*.key binary
+*.pem binary
+secrets/* binary
+certs/* binary
+
+# Logs - traitement spécial
+*.log text
+logs/* text
+
+# =============================================================================
+# PERFORMANCE
+# =============================================================================
+
+# Fichiers volumineux - LFS si nécessaire
+# (décommenté si Git LFS est utilisé)
+# *.wav filter=lfs diff=lfs merge=lfs -text
+# *.mp3 filter=lfs diff=lfs merge=lfs -text
+# *.onnx filter=lfs diff=lfs merge=lfs -text
+# *.bin filter=lfs diff=lfs merge=lfs -text
+
+# =============================================================================
+# HOOKS ET VALIDATION
+# =============================================================================
+
+# Fichiers à valider avant commit
+*.py text whitespace=tab-in-indent,trailing-space
+*.js text whitespace=tab-in-indent,trailing-space
+*.ts text whitespace=tab-in-indent,trailing-space
+*.json text whitespace=trailing-space
+*.yaml text whitespace=trailing-space
+*.yml text whitespace=trailing-space
+
+# Fichiers de configuration critique
+.env.sample text whitespace=trailing-space
+TODO.md text whitespace=trailing-space
+DECISIONS.md text whitespace=trailing-space
+RISKS.md text whitespace=trailing-space
+
+# =============================================================================
+# NOTES
+# =============================================================================
+
+# Ce fichier .gitattributes :
+# 1. Normalise les fins de ligne (LF par défaut, CRLF pour Windows)
+# 2. Définit l'encodage et le traitement des fichiers
+# 3. Configure les stratégies de diff et merge
+# 4. Optimise la détection de langage GitHub
+# 5. Protège les fichiers sensibles
+# 6. Améliore les performances Git
+#
+# Références :
+# - https://git-scm.com/docs/gitattributes
+# - https://github.com/github/linguist
+# - https://git-lfs.github.io/
