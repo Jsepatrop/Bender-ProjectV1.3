@@ -142,6 +142,27 @@
 
 **Référence :** Section 3.2.3 "LEDs WS2812E" du dossier de définition v1.2
 
+### 2025-01-21 - Firmware test LEDs ESP32
+**Contexte :** Câblage terminé, LEDs non fonctionnelles, besoin de validation matérielle  
+**Options évaluées :**
+- Test simple avec une seule LED
+- Test complet avec FastLED sur tous les segments
+
+**Décision :** Création firmware test complet avec FastLED sur GPIO16/17/21  
+**Justification :** 
+- Test systématique par segment (dents, yeux)
+- Animations de validation pour debug visuel
+- Debug série pour traçabilité
+- Validation complète du câblage avant intégration MQTT
+
+**Impact :** 
+- Firmware `firmware/esp32_led_test.ino` créé
+- Tests par segment : cycles couleurs, arc-en-ciel
+- Moniteur série 115200 baud pour debug
+- Validation matérielle avant développement final
+
+**Référence :** EPIC 3 du dossier de définition, contraintes ESP32 GPIO16/17/21
+
 ---
 
 ## Décisions en attente

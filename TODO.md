@@ -4,8 +4,9 @@
 
 ### EPIC 1 - Maquette & câblage
 **Objectif** : Assembler Pi5, ESP32, 2×INMP441, 2×MAX98357A, quelques LEDs WS2812E selon pinouts définis
-**Statut** : 🔴 Pending
+**Statut** : 🟡 En cours (câblage terminé, test LEDs en cours)
 **Dépendances** : Matériel disponible, accès Pi5
+**Accès Pi5** : SSH bender@192.168.1.104 (Pi OS Lite 64-bit installé)
 
 ### EPIC 2 - Dev/Install Pi
 **Objectif** : Pipeline audio (AEC WebRTC, VAD), router intents HA, UI FastAPI+React HTTPS, services systemd
@@ -48,29 +49,29 @@
 
 ### 🔥 EPIC 1 - Maquette & câblage
 
-#### T1.1 - Câblage I²S Pi5
+#### T1.1 - Câblage I²S Pi5 ✅ FAIT
 **ID** : T1.1  
 **Titre** : Configuration pinouts I²S full-duplex Pi5  
 **Description** : Câbler selon pinouts définis : BCLK=GPIO18/pin12, LRCLK=GPIO19/pin35, DIN=GPIO20/pin38, DOUT=GPIO21/pin40  
 **Dépendances** : Matériel disponible  
 **Scripts envisagés** : `/scripts/pi/setup_audio.sh` (overlay I²S, PipeWire config)  
 **Critères Done** : 
-- Overlay I²S activé dans /boot/config.txt
-- Pins correctement câblés et testés avec multimètre
-- PipeWire détecte les devices I²S
+- [x] Overlay I²S activé dans /boot/config.txt
+- [x] Pins correctement câblés et testés avec multimètre
+- [x] PipeWire détecte les devices I²S
 - [x] Documentation schéma de câblage (CABLAGE.md créé)
 **Risques/Plan B** : Si full-duplex bloque → Plan B DAC USB pour sortie audio
 
-#### T1.2 - Câblage INMP441×2
+#### T1.2 - Câblage INMP441×2 ✅ FAIT
 **ID** : T1.2  
 **Titre** : Installation microphones I²S stéréo  
 **Description** : Bus partagé BCLK/LRCLK, SD commun→GPIO20, front L/R=GND, torse L/R=3V3  
 **Dépendances** : T1.1 terminé  
 **Scripts envisagés** : Test capture avec `arecord -D hw:1,0 -f S32_LE -r 48000 -c 2`  
 **Critères Done** : 
-- 2 mics câblés selon schéma (résistances 330Ω, voir CABLAGE.md)
-- Capture stéréo fonctionnelle 48kHz
-- Niveaux différenciés front/torse vérifiés
+- [x] 2 mics câblés selon schéma (résistances 330Ω, voir CABLAGE.md)
+- [x] Capture stéréo fonctionnelle 48kHz
+- [x] Niveaux différenciés front/torse vérifiés
 **Risques/Plan B** : Problème bus → isoler 1 mic pour debug
 
 #### T1.3 - Câblage MAX98357A×2
@@ -86,18 +87,18 @@
 - Consommation mesurée <1.3A total
 **Risques/Plan B** : Problème full-duplex → DAC USB + ampli analogique
 
-#### T1.4 - Câblage ESP32 LEDs
+#### T1.4 - Test LEDs ESP32 🟡 EN COURS
 **ID** : T1.4  
-**Titre** : Installation chaînes WS2812E  
+**Titre** : Installation et test chaînes WS2812E  
 **Description** : GPIO16(teeth,18), GPIO17(eye_left,9), GPIO21(eye_right,9), R 330Ω, condo 1000µF, alim 5V/5A  
 **Dépendances** : ESP32 disponible  
 **Scripts envisagés** : Test basique NeoPixelBus  
 **Critères Done** : 
-- 3 chaînes LEDs câblées selon schéma (CABLAGE.md)
-- Résistances 330Ω installées sur chaque ligne de données
-- Alimentation 5V/5A + condo 1000µF + fusible 2.5-3A
-- Test couleurs de base fonctionnel
-- Consommation mesurée <2.2A à pleine luminosité
+- [x] 3 chaînes LEDs câblées selon schéma (CABLAGE.md)
+- [x] Résistances 330Ω installées sur chaque ligne de données
+- [x] Alimentation 5V/5A + condo 1000µF + fusible 2.5-3A
+- [ ] Test couleurs de base fonctionnel
+- [ ] Consommation mesurée <2.2A à pleine luminosité
 **Risques/Plan B** : Level-shifter 74AHCT125 si signaux instables
 
 ### 🔥 EPIC 2 - Dev/Install Pi
