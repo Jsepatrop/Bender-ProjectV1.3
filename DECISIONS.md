@@ -219,6 +219,45 @@
 
 **Référence :** EPIC 3 du dossier de définition, contraintes ESP32 GPIO16/17/21
 
+### 2025-01-20 - Configuration Audio Raspberry Pi 5
+
+**Contexte** : Setup du pipeline audio I²S avec microphones INMP441 et amplificateurs MAX98357A selon les pinouts définis dans le dossier de définition.
+
+**Décision** : Création du script `setup_audio.sh` avec configuration complète :
+- I²S full-duplex : BCLK=GPIO18, LRCLK=GPIO19, DIN=GPIO20, DOUT=GPIO21
+- PipeWire + AEC WebRTC pour suppression d'écho
+- Configuration ALSA avec devices `bender_capture` et `bender_playback`
+- Tests automatiques de capture et lecture audio
+
+**Justification** :
+- **PipeWire vs PulseAudio** : PipeWire choisi pour sa meilleure gestion de la latence et support natif AEC WebRTC
+- **I²S vs USB** : I²S privilégié pour la latence minimale, Plan B DAC USB documenté
+- **AEC WebRTC** : Standard industriel pour suppression d'écho, intégré nativement dans PipeWire
+- **Format S32_LE** : Format natif I²S, évite les conversions coûteuses
+- **48kHz** : Fréquence native des composants, conversion vers 16kHz pour ASR en aval
+
+**Configuration technique** :
+```
+Microphones INMP441 :
+- Front (L/R=GND) + Torse (L/R=3V3) → Stéréo différentiel
+- Bus I²S partagé vers GPIO18/19/20
+
+Amplificateurs MAX98357A :
+- 2× amplis pour stéréo, bus I²S partagé depuis GPIO18/19/21
+- Gain différentiel : Gauche=9dB, Droit=15dB
+```
+
+**Alternatives écartées** :
+- **ALSA seul** : Pas d'AEC intégré, configuration plus complexe
+- **Jack** : Overkill pour notre usage, latence plus élevée
+- **USB Audio** : Latence plus élevée, dépendance matérielle externe
+
+**Validation** : Script complet avec tests automatiques, guide d'installation détaillé
+
+**Plan B documenté** : En cas d'échec I²S full-duplex, basculement vers capture I²S + playback DAC USB
+
+**Impact** : T2.1 terminée, base solide pour T2.2 (Pipeline audio complet)
+
 ---
 
 ## Décisions en attente
